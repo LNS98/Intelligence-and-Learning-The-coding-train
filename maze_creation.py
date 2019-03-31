@@ -6,30 +6,23 @@ import matplotlib.pyplot as plt
 import random
 import time
 
-def main():
+# define the gloabal variables for the problem
+global delta_x, rows, cols
+rows  = 5
+cols = 5
+delta_x = 1
 
-    # define the gloabal variables for the problem
-    global delta_x, rows, cols
-    rows  = 10
-    cols = 10
-    delta_x = 1
+see_maze = True
 
+def main_maze():
 
     # make an array containing all the grid points and the stack
-    grid = []
+    grid = make_grid(cols, rows)
     stack = []
 
-    # create all the cells in the grid
-    for i in range(rows):
-        # go through rows
-        for j in range(cols):
-            # go through columns
-            # make a cell
-            cell = Cell(i, j)
-            grid.append(cell)
-
+    print(len(grid))
     # draw grid
-    # draw(grid)
+    draw(grid, "grid", "g")
 
     #---------------------- Start algorithm --------------------------
 
@@ -40,18 +33,20 @@ def main():
 
     while True:
 
-        # start interactive mode
-        plt.ion()
+        if see_maze == True:
+            # start interactive mode
+            plt.ion()
 
 
         # get a random unvisited neighbour
         next = current.checkNeighbours(grid)
 
         if next == None and len(stack) == 0:
-            # program ended
-            plt.ioff()
-            draw(grid)
-            plt.show()
+            if see_maze == True:
+                # program ended
+                plt.ioff()
+                draw(grid, "grid", "g")
+                plt.show()
             break
 
 
@@ -74,28 +69,51 @@ def main():
             current = stack.pop()
 
         else:
-            # program ended
-            plt.ioff()
-            draw(grid)
-            plt.show()
+            if see_maze == True:
+                # program ended
+                plt.ioff()
+                draw(grid, "grid", "g")
+                plt.show()
             break
 
+        if see_maze == True:
+            # draw grid
+            draw(grid, "grid", "g")
+            current.show("r")
+            # show figure
+            plt.show()
+            plt.pause(1e-2)
+            plt.clf()
 
-        # draw grid
-        draw(grid)
-        # show figure
-        plt.show()
-        plt.pause(1e-3)
-        plt.clf()
 
-    return 0
+
+    return grid
+
+def make_grid(col_number, row_number):
+
+    # initialise the grid
+    grid = []
+
+    # create all the cells in the grid
+    for i in range(col_number):
+        # go through rows
+        for j in range(row_number):
+            # go through columns
+            # make a cell
+            cell = Cell(i, j)
+            grid.append(cell)
+
+    return grid
 
 def index(i, j):
+
+    # grid = [j = 0, 1, 2, 3, 4; ]
+
     # check if its a valid index in the grid
-    if i < 0 or j < 0 or i > rows - 1 or j > cols - 1:
+    if i < 0 or j < 0 or i > cols - 1 or j > rows - 1:
         return None
 
-    return j + cols*i
+    return j + rows*i
 
 def removeWalls(a, b):
 
@@ -127,19 +145,22 @@ def removeWalls(a, b):
 
     return a, b
 
-
-def draw(grid):
+def draw(grid, type, col):
     """
     Draw the grid
     """
+    if type == "grid":
+        # create all the cells in the grid
+        for i in range(cols):
+            # go through rows
+            for j in range(rows):
+                cell = grid[index(i, j)]
+                # show the grid made
+                cell.show(col)
+    else:
+        for cell in grid:
+            cell.show(col)
 
-    # create all the cells in the grid
-    for i in range(rows):
-        # go through rows
-        for j in range(cols):
-            cell = grid[index(i, j)]
-            # show the grid made
-            cell.show()
 
     return None
 
@@ -147,9 +168,9 @@ def draw(grid):
 class Cell:
 
     def __init__(self, i, j):
-        # row number (y's) (centre of x,y coordinates)
+        # column number (x's) (centre of x,y coordinates)
         self.i = i
-        # cloumn number (x's) (centre of x,y coordinates)
+        # rows number (y's) (centre of x,y coordinates)
         self.j = j
         # initilaise each walls with all sides being walls
                     # bottom, right, top, left
@@ -157,15 +178,24 @@ class Cell:
         # check if cell has been visited, at start it is not visited
         self.visited = False
 
+        # initilisation for A_star finding algorithm
+        self.neighbours = []
+
+        self.f = 0
+        self.g = 0
+        self.h = 0
+
+        self.previous = None
+
     def checkNeighbours(self, grid):
         # initilise a empty areay which will contain the neighbours
         neighbours = []
 
         # get the bottom, right, top, left neighbours
-        bottom = index(self.i - 1, self.j)
-        right = index(self.i, self.j + 1)
-        top = index(self.i + 1, self.j)
-        left = index(self.i, self.j - 1)
+        bottom = index(self.i, self.j - 1)
+        right = index(self.i + 1, self.j)
+        top = index(self.i, self.j + 1)
+        left = index(self.i - 1, self.j)
 
         # list of indicies
         indicies = [bottom, right, top, left]
@@ -184,8 +214,31 @@ class Cell:
 
         return None
 
+    def addNeighbours(self, grid):
 
-    def show(self):
+        # get the bottom, right, top, left neighbours
+        bottom = index(self.i, self.j - 1)
+        right = index(self.i + 1, self.j)
+        top = index(self.i, self.j + 1)
+        left = index(self.i - 1, self.j)
+
+        # list of indicies
+        indicies = [bottom, right, top, left]
+
+        for index_number, index_value in enumerate(indicies):
+            # check index exists and that the walls there isnt a wall
+            if index_value != None and self.walls[index_number] != True:
+
+                # get the grid value of the neighbour
+                grid_value = grid[index_value]
+                grid_value.show("y")
+                self.neighbours.append(grid_value)
+
+
+        return None
+
+
+    def show(self, col):
 
         # x cooridnates
         left_x = self.i - delta_x / 2
@@ -207,11 +260,14 @@ class Cell:
         if self.walls[3] == True:
             plt.plot([left_x, left_x], [up_y, down_y], "k-")
 
+        # if self.visited == True:
+        #     # plot circling the whole cell
+        #     plt.fill([left_x, right_x, right_x, left_x, left_x],
+        #              [down_y,down_y, up_y, up_y, down_y], color = "g")
 
-        if self.visited == True:
-            # plot circling the whole cell
-            plt.fill([left_x, right_x, right_x, left_x, left_x],
-                     [down_y,down_y, up_y, up_y, down_y], "g")
+        # fill the whole cell with a colour
+        plt.fill([left_x, right_x, right_x, left_x, left_x],
+                 [down_y,down_y, up_y, up_y, down_y], color = col)
 
         # plot circling the whole cell
         # plt.fill([left_x, right_x, right_x, left_x, left_x],
@@ -230,5 +286,7 @@ def help():
     return None
 
 if __name__ == "__main__":
-    main()
+    start = time.time()
+    main_maze()
     # help()
+    print("------------- Time taken: {} -----------------------------".format(time.time() - start))
