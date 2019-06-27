@@ -1,70 +1,147 @@
 """
-Implement the Lexicographical order Algorithm. An example of this is: for A,B,C
-the order would be: ABC, ACB, BAC, BCA, CAB, CBA.
+Classical travelling salesperson algorithm implementation.
 """
 
-import numpy as np
+
+
+import matplotlib.pyplot as plt
 import time
+
+import random
+import numpy as np
+
 
 def main():
 
-    # initialise test array
-    new_array = [0, 1, 2, 3]
+    # interactive mode on
+    plt.ion()
 
-    while new_array != False:
-        print(new_array)
-        new_array = algorithm(new_array)
+    # decide how many cities to have
+    num_cities = 4
 
+    # initlialise the array which will contain the cities for which eh path has to be checcked
+    cities = pop_cities(num_cities)
 
-    return 0
+    # initialise the best distance as the first one
+    best_dist = tot_distance(cities)
+    best_path = cities.copy()
 
-def algorithm(array):
+    while True:
+
+        # display cities
+        plot_cities(cities, best_path)
+
+        # swap the order of the cities with a bunch of random numbers
+        pos1 = random.randint(0, len(cities) - 1)
+        pos2 = random.randint(0, len(cities) - 1)
+        swap(cities, pos1, pos2)
+
+        # check the new distance
+        curr_dist = tot_distance(cities)
+
+        # update best distnace if current is lower
+        if curr_dist < best_dist:
+            # get the best path and distance
+            best_dist = curr_dist
+            best_path = cities.copy()
+
+            print(best_dist)
+
+    return None
+
+def pop_cities(num_cities):
     """
-    1) Find largest x : p[x] < p[x + 1]. If you cant this is the last permutation
-    2) Find largest y : p[x] < p[y].
-    3) Swap p[x] and p[y]
-    4) Reverse p[x+1 .. n]
+    Return an array  with the x, y location of the number of cities.
     """
 
-    # Do step 1 by finding largest X value
-    largest_x = None # this is an invalid index
-    for i in range(len(array) - 1):
-        # check for p[x] < p[x+1]
-        if array[i] < array[i + 1]:
-            largest_x = i
+    # initialise empty array which will contain cities
+    cities  = []
 
-    if largest_x == None:
-        return False
+    for i in range(num_cities):
+        # get a random x, y point between 0, 10
+        x = random.random() * 10
+        y = random.random() * 10
 
-    # find largest y : p[x] < p[y]
-    largest_y = None
-    for j in range(len(array)):
-        if array[largest_x] < array[j]:
-            largest_y = j
+        # append as an array to the cities
+        cities.append((x, y))
 
-    if largest_y == None:
-        return False
+    return cities
 
-    # swap p[x] and p[y]
-    temp = array[largest_x]
-    array[largest_x] = array[largest_y]
-    array[largest_y] = temp
+def swap(array, i, j):
+    """
+    Swap position i and j in the array
+    """
 
-    # reverse p[x+1, ... , n]
-    reverse_array = array[:largest_x:-1]
-    new_array = array[:largest_x + 1] + reverse_array
+    temp = array[i]
 
-    return new_array
+    array[i] = array[j]
+    array[j] = temp
+
+    return None
+
+def distance(a, b):
+    """
+    calculate the distance between points a and b.
+    """
+    x_dist = b[0] - a[0]
+    y_dist = b[1] - a[1]
+
+    dist = (x_dist ** 2 + y_dist ** 2) ** (1/2)
+
+    return dist
+
+def tot_distance(points):
+    """
+    Calculate the distance between the points in the incoming array.
+    """
+    # initialise total sum
+    sum = 0
+
+    # loop along points
+    for i in range(len(points) - 1):
+        # get the ith and ith + 1 point
+        a = points[i]
+        b = points[i + 1]
+
+        # add the distance to the sum
+        sum += distance(a, b)
+
+
+    return sum
+
+
+def plot_cities(cities, best_path):
+
+    # get the x, y points
+    cities = np.array(cities)
+
+    x = cities[:, 0]
+    y = cities[:, 1]
+
+    best_path = np.array(best_path)
+
+    x_best = best_path[:, 0]
+    y_best = best_path[:, 1]
+
+    # plot points
+    plt.scatter(x, y, s = 25, c = "k")
+    plt.plot(x, y, "k-")
+    plt.plot(x_best, y_best, "r--")
+    plt.axis('off')
+    plt.show()
+    plt.pause(2 * 1e-5)
+    plt.clf()
+
+    return None
 
 def help():
 
-    a = [1, 2, 3, 4 ,5, 6]
+    a = [1, 2, 4, 5]
+    print(a)
 
-    # reverse p[x+1, ... , n]
-    new_array = a[:3]
+    swap(a, 2, 3)
 
-    print(new_array)
-
+    print(a)
 
     return None
 
