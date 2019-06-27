@@ -3,7 +3,7 @@ Genetic Algorithm to try and solve the travelling salespererson problem
 """
 
 
-from lexicographic_permutations import pop_cities, tot_distance, plot_cities, distance
+from travelling_salesperson_lexi_order import pop_cities, tot_distance, plot_cities, distance
 import random
 import numpy as np
 import matplotlib.pyplot as plt
@@ -232,6 +232,31 @@ def new_ele(item1, item2):
 
     return new_item
 
+def new_ele_try2(item1, item2):
+    """
+    Second try.
+    """
+
+    print(item1)
+    print(item2)
+
+    # get the first coord of item1; this is the strating point
+    start = item1[0]
+
+    # find the points which move out of it: select the shortest distance
+
+    # get the indicies of the position in the parent lists
+    start_index_1 = item1.index(start)
+    start_index_2 = item2.index(start)
+
+    # get the points whcih move out of the
+
+    #  repeat until all points are chosen
+
+    child = 0
+
+    return child
+
 def best_pop_score(pop):
 
     best = max(pop["score"])
@@ -259,7 +284,7 @@ def plot_population(pop):
     y = cities[:, 1]
     plt.scatter(x, y, s = 25, c = "k")
 
-    for i in range(len(pop)):
+    for i in range(len(pop["path"])):
         # get the x, y points
         cities = np.array(pop["path"][i])
 
@@ -267,8 +292,8 @@ def plot_population(pop):
         y_jour = cities[:, 1]
 
         # plot points
-        plt.plot(x_jour, y_jour)
-        plt.axis('off')
+        plt.plot(x_jour, y_jour, "--")
+        # plt.axis('off')
 
     plt.show()
 
@@ -305,15 +330,17 @@ def plot_best_dist(pop):
 def help():
 
 
-    item1 = [1, 2 , 3, 4, 5]
-    item2 = [4, 5, 6]
+    cities = pop_cities(3)
+    # cities = [(0, 0), (1, 0), (0, 1), (1, 1)]
 
+    # create inital population of legnths
+    new_pop = init_pop(cities, 2)
 
-    try:
-        a = item1[8]
-        print(a)
-    except error:
-        print("over inddexed")
+    # make a child out of the  population
+    child = new_ele_try2(new_pop["path"][0], new_pop["path"][1])
+
+    # plot the population
+    plot_population(new_pop)
 
     return None
 

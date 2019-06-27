@@ -1,162 +1,70 @@
 """
-Lexico travelling salesperson algorithm implementation. Basically check all the
-permutations
+Implement the Lexicographical order Algorithm. An example of this is: for A,B,C
+the order would be: ABC, ACB, BAC, BCA, CAB, CBA.
 """
 
-
-
-import matplotlib.pyplot as plt
-import time
-from lex_graph_order import algorithm as lex_order
-
-import random
 import numpy as np
-
-# random.seed(0)
-show_graph = True
+import time
 
 def main():
 
-    # interactive mode on
-    plt.ion()
+    # initialise test array
+    new_array = [0, 1, 2, 3]
 
-    # decide how many cities to have
-    num_cities = 6
+    while new_array != False:
+        print(new_array)
+        new_array = algorithm(new_array)
 
-    # initlialise the array which will contain the cities for which eh path has to be checcked
-    cities = pop_cities(num_cities)
 
-    # debug puposes
-    # cities = [(0, 0), (1, 0), (0, 1), (1, 1)]
+    return 0
 
-    # initialise the best distance as the first one
-    best_dist = tot_distance(cities)
-    best_path = cities.copy()
-
-    while True:
-
-        # display cities
-        if show_graph == True:
-            plot_cities(cities, best_path)
-
-        # get the next order of teh cities using lex order
-        prev_cities = cities
-        cities = lex_order(cities)
-
-        # stop if you've gone through all teh permutations
-        if cities == False:
-            plt.ioff()
-            # display cities
-            print("------------- Time taken: {} -----------------------------".format(time.time() - start))
-            plot_cities(prev_cities, best_path)
-            break
-
-        # check the new distance
-        curr_dist = tot_distance(cities)
-
-        # update best distnace if current is lower
-        if curr_dist < best_dist:
-            # get the best path and distance
-            best_dist = curr_dist
-            best_path = cities.copy()
-
-            print(best_dist)
-
-    return None
-
-def pop_cities(num_cities):
+def algorithm(array):
     """
-    Return an array  with the x, y location of the number of cities.
+    1) Find largest x : p[x] < p[x + 1]. If you cant this is the last permutation
+    2) Find largest y : p[x] < p[y].
+    3) Swap p[x] and p[y]
+    4) Reverse p[x+1 .. n]
     """
 
-    # initialise empty array which will contain cities
-    cities  = []
+    # Do step 1 by finding largest X value
+    largest_x = None # this is an invalid index
+    for i in range(len(array) - 1):
+        # check for p[x] < p[x+1]
+        if array[i] < array[i + 1]:
+            largest_x = i
 
-    for i in range(num_cities):
-        # get a random x, y point between 0, 10
-        x = random.random() * 10
-        y = random.random() * 10
+    if largest_x == None:
+        return False
 
-        # append as an array to the cities
-        cities.append((x, y))
+    # find largest y : p[x] < p[y]
+    largest_y = None
+    for j in range(len(array)):
+        if array[largest_x] < array[j]:
+            largest_y = j
 
-    return cities
+    if largest_y == None:
+        return False
 
-def swap(array, i, j):
-    """
-    Swap position i and j in the array
-    """
+    # swap p[x] and p[y]
+    temp = array[largest_x]
+    array[largest_x] = array[largest_y]
+    array[largest_y] = temp
 
-    temp = array[i]
+    # reverse p[x+1, ... , n]
+    reverse_array = array[:largest_x:-1]
+    new_array = array[:largest_x + 1] + reverse_array
 
-    array[i] = array[j]
-    array[j] = temp
-
-    return None
-
-def distance(a, b):
-    """
-    calculate the distance between points a and b.
-    """
-    x_dist = b[0] - a[0]
-    y_dist = b[1] - a[1]
-
-    dist = (x_dist ** 2 + y_dist ** 2) ** (1/2)
-
-    return dist
-
-def tot_distance(points):
-    """
-    Calculate the distance between the points in the incoming array.
-    """
-    # initialise total sum
-    sum = 0
-
-    # loop along points
-    for i in range(len(points) - 1):
-        # get the ith and ith + 1 point
-        a = points[i]
-        b = points[i + 1]
-
-        # add the distance to the sum
-        sum += distance(a, b)
-
-
-    return sum
-
-
-def plot_cities(cities, best_path):
-
-    # get the x, y points
-    cities = np.array(cities)
-
-    x = cities[:, 0]
-    y = cities[:, 1]
-
-    best_path = np.array(best_path)
-
-    x_best = best_path[:, 0]
-    y_best = best_path[:, 1]
-
-    # plot points
-    plt.scatter(x, y, s = 25, c = "k")
-    plt.plot(x, y, "k-")
-    plt.plot(x_best, y_best, "r--")
-    plt.axis('off')
-    plt.show()
-    plt.pause(2 * 1e-5)
-    plt.clf()
-
-    return None
+    return new_array
 
 def help():
 
-    a = [1, 2, 4, 5]
-    print(a)
+    a = [1, 2, 3, 4 ,5, 6]
 
-    swap(a, 2, 3)
+    # reverse p[x+1, ... , n]
+    new_array = a[:3]
 
-    print(a)
+    print(new_array)
+
 
     return None
 

@@ -1,15 +1,19 @@
 """
-Classical travelling salesperson algorithm implementation.
+Lexico travelling salesperson algorithm implementation. Basically check all the
+permutations
 """
 
 
 
 import matplotlib.pyplot as plt
 import time
+from lex_graph_order import algorithm as lex_order
 
 import random
 import numpy as np
 
+# random.seed(0)
+show_graph = True
 
 def main():
 
@@ -17,10 +21,13 @@ def main():
     plt.ion()
 
     # decide how many cities to have
-    num_cities = 4
+    num_cities = int(input("how many cities? "))
 
     # initlialise the array which will contain the cities for which eh path has to be checcked
     cities = pop_cities(num_cities)
+
+    # debug puposes
+    # cities = [(0, 0), (1, 0), (0, 1), (1, 1)]
 
     # initialise the best distance as the first one
     best_dist = tot_distance(cities)
@@ -29,12 +36,20 @@ def main():
     while True:
 
         # display cities
-        plot_cities(cities, best_path)
+        if show_graph == True:
+            plot_cities(cities, best_path)
 
-        # swap the order of the cities with a bunch of random numbers
-        pos1 = random.randint(0, len(cities) - 1)
-        pos2 = random.randint(0, len(cities) - 1)
-        swap(cities, pos1, pos2)
+        # get the next order of teh cities using lex order
+        prev_cities = cities
+        cities = lex_order(cities)
+
+        # stop if you've gone through all teh permutations
+        if cities == False:
+            plt.ioff()
+            # display cities
+            print("------------- Time taken: {} -----------------------------".format(time.time() - start))
+            plot_cities(prev_cities, best_path)
+            break
 
         # check the new distance
         curr_dist = tot_distance(cities)
