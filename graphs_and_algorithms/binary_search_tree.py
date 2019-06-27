@@ -14,7 +14,7 @@ def main():
 
     # add the node as the root tree
     for i in range(10):
-        value = randint(0, 100)
+        value = randint(0, 10)
         bin_tree.addNodeTree(value)
 
 

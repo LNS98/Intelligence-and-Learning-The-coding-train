@@ -8,8 +8,8 @@ import time
 
 # define the gloabal variables for the problem
 global delta_x, rows, cols
-rows  = 5
-cols = 5
+rows  = 10
+cols = 10
 delta_x = 1
 
 see_maze = True
