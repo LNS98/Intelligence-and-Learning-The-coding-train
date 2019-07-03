@@ -12,8 +12,7 @@ from lex_graph_order import algorithm as lex_order
 import random
 import numpy as np
 
-# random.seed(0)
-show_graph = True
+random.seed(0)
 
 def main():
 
@@ -28,6 +27,16 @@ def main():
 
     # debug puposes
     # cities = [(0, 0), (1, 0), (0, 1), (1, 1)]
+
+    lexi_algorithm(cities)
+
+    return None
+
+def lexi_algorithm(cities, show_graph = True):
+    """
+    the algorithmfor the Lexicographical implementation of the travelling
+    salesperson.
+    """
 
     # initialise the best distance as the first one
     best_dist = tot_distance(cities)
@@ -47,7 +56,7 @@ def main():
         if cities == False:
             plt.ioff()
             # display cities
-            print("------------- Time taken: {} -----------------------------".format(time.time() - start))
+            print("Finished")
             plot_cities(prev_cities, best_path)
             break
 
@@ -60,7 +69,9 @@ def main():
             best_dist = curr_dist
             best_path = cities.copy()
 
+
             print(best_dist)
+
 
     return None
 
@@ -124,7 +135,6 @@ def tot_distance(points):
 
     return sum
 
-
 def plot_cities(cities, best_path):
 
     # get the x, y points
@@ -140,8 +150,8 @@ def plot_cities(cities, best_path):
 
     # plot points
     plt.scatter(x, y, s = 25, c = "k")
-    plt.plot(x, y, "k-")
-    plt.plot(x_best, y_best, "r--")
+    plt.plot(x, y, "r--")
+    plt.plot(x_best, y_best, "k-")
     plt.axis('off')
     plt.show()
     plt.pause(2 * 1e-5)

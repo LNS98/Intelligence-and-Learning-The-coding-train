@@ -3,7 +3,7 @@ Genetic Algorithm to try and solve the travelling salespererson problem
 """
 
 
-from travelling_salesperson_lexi_order import pop_cities, tot_distance, plot_cities, distance
+from travelling_salesperson_lexi_order import pop_cities, tot_distance, plot_cities, distance, swap
 import random
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,9 +22,11 @@ import time
 # create a set of random distances, they can be arrays
 
 # how to mate?
-# take half array of one and of the other (nice and simple to start of with)
+# just pick better ones and mutate them
 
 
+
+random.seed(0)
 
 
 def main():
@@ -33,15 +35,23 @@ def main():
     plt.ion()
 
     # initialise the set of cities
-    num_cities = 7
+    num_cities = int(input("how many cities? "))
 
     cities = pop_cities(num_cities)
     # cities = [(0, 0), (1, 0), (0, 1), (1, 1)]
 
-    print(cities)
+    genetic_algorithm_implementation(cities)
+
+    return 0
+
+def genetic_algorithm_implementation(cities, show_graph = True):
 
     # create inital population of legnths
-    new_pop = init_pop(cities, 10)
+    new_pop = init_pop(cities, 50)
+
+    # initialise the best distance as the first one
+    best_dist = tot_distance(cities)
+    best_path = cities.copy()
 
     while True:
 
@@ -49,8 +59,23 @@ def main():
         new_pop = pop_score(new_pop)
 
         # debug
-        # plot_best_dist(new_pop)
-        print("Average population distance: {}".format(average_pop_score(new_pop)))
+        # print("Average population distance: {}".format(average_pop_score(new_pop)))
+        # print("Best population distance: {}\n".format(best_pop_score(new_pop)))
+
+        # check to see if there is a better path
+        best_pop_distance = best_pop_score(new_pop)
+
+        # update best distnace if current is lower
+        if best_pop_distance < best_dist:
+            if show_graph == True:
+                plot_best_dist(new_pop)
+
+            # get the best path and distance
+            best_dist = best_pop_distance
+            best_path = cities.copy()
+
+            print(best_dist)
+
 
         # get a mating pool
         mat_pool = mating_pool(new_pop)
@@ -58,9 +83,9 @@ def main():
         # get the new population
         new_pop = create_new_pop(new_pop, mat_pool)
 
+    return None
 
-
-    return 0
+# ------------------------------- Genetic Algorithm -----------------------
 
 # initialise the set of arrays used in first population
 def  init_pop(init_array, n):
@@ -80,7 +105,7 @@ def  init_pop(init_array, n):
         rand_array = [init_array[j] for j in perm]
 
         # place in pop list
-        # pop["id"].append(perm)
+        # pop["order"].append(perm)
         pop["path"].append(rand_array)
 
     return pop
@@ -138,6 +163,29 @@ def mating_pool(pop):
 
     return mating_pool
 
+def mutate(array, mut_rate):
+    """
+    Swap the order of two elements in the array
+    """
+    # create a copy of the order which you will mutate
+    new_order = array
+
+    # get a ranndom number in the order array
+    rand_index = random.randint(0, len(array))
+
+    # in this case no mutation because it has randomly selected the last element
+    if rand_index >= len(array) - 1:
+        return array
+
+    # only mutate accorading to the mutation rate
+    if random.random() > mut_rate:
+        return array
+
+    # swap the index of the random number and the next one in the array
+    swap(new_order, rand_index, rand_index + 1)
+
+    return new_order
+
 # mate the objects and create new population
 def create_new_pop(old_pop, mating_pool):
     """
@@ -150,112 +198,18 @@ def create_new_pop(old_pop, mating_pool):
     # get a random set of n arrays
     while len(new_pop["path"]) < len(old_pop["path"]):
 
-        # check if child is in the new_pop already
-        while True:
-            # choose at random from the mating pool two parents
-            par1 = random.choice(mating_pool)
-            par2 = random.choice(mating_pool)
 
-            # create child
-            child = new_ele(par1, par2)
+        # choose at random from the mating pool two parents
+        parent = random.choice(mating_pool)
 
-            if child not in new_pop["path"]:
-                break
+        # create child by mutating parent
+        child = mutate(parent, 0.1)
 
         # place in pop list
         new_pop["path"].append(child)
 
 
     return new_pop
-
-def new_ele(item1, item2):
-    """
-    Mate two elements from the population by getting half of 1 and half of the other
-    """
-
-    # you have to think of something more clever
-    plt.ioff()
-
-    item1 = np.array(item1)
-    item2 = np.array(item2)
-
-    print(item1, item2)
-
-    x = item1[:, 0]
-    y = item1[:, 1]
-
-
-    x_2 = item2[:, 0]
-    y_2 = item2[:, 1]
-
-    plt.plot(x, y, "k--")
-    plt.scatter(x, y, s = 25, c = "k")
-    plt.plot(x_2, y_2, "r--")
-    plt.show()
-
-
-    new_item = [item1[0]]
-
-    count = 0
-    while new_item < len(item1):
-        ele = item1[count]
-
-        # get the position of the same element in item2
-        pos_item2 = item2.index(ele)
-
-        # get the distance from both items
-        try:
-            dist1 = distance(ele, item[count + 1])
-        except error:
-            dist1 = np.inf
-
-        try:
-            dist2 = distance(item2[pos_item2], item2[pos_item2 + 1])
-        except:
-            dist2 = np.inf
-
-
-        if dist1 < dist2:
-            new_item.append(item1[count + 1])
-            count += 1
-        else:
-            new_item.appennd(item2[pos_item2 + 1])
-            count = item1.index(item2[pos_item2 + 1])
-
-
-
-    # get the two legnths of each item to be used
-    len1 = int(len(item1)/ 2)
-
-    # create new item
-    new_item = item1[:len1] + item2[len1:]
-
-    return new_item
-
-def new_ele_try2(item1, item2):
-    """
-    Second try.
-    """
-
-    print(item1)
-    print(item2)
-
-    # get the first coord of item1; this is the strating point
-    start = item1[0]
-
-    # find the points which move out of it: select the shortest distance
-
-    # get the indicies of the position in the parent lists
-    start_index_1 = item1.index(start)
-    start_index_2 = item2.index(start)
-
-    # get the points whcih move out of the
-
-    #  repeat until all points are chosen
-
-    child = 0
-
-    return child
 
 def best_pop_score(pop):
 
@@ -272,6 +226,8 @@ def average_pop_score(pop):
     average = sum(distances) / len(distances)
 
     return average
+
+# --------------------------------- Plot the graphs --------------------
 
 def plot_population(pop):
     """
@@ -319,10 +275,10 @@ def plot_best_dist(pop):
     y_best = best_path[:, 1]
 
     # plot points
-    plt.plot(x_best, y_best, "r--")
+    plt.plot(x_best, y_best, "k-")
     plt.axis('off')
     plt.show()
-    plt.pause(2 * 1e-0)
+    plt.pause(2 * 1e-7)
     plt.clf()
 
     return None
@@ -336,6 +292,8 @@ def help():
     # create inital population of legnths
     new_pop = init_pop(cities, 2)
 
+    print(new_pop)
+
     # make a child out of the  population
     child = new_ele_try2(new_pop["path"][0], new_pop["path"][1])
 
@@ -347,6 +305,6 @@ def help():
 
 if __name__ == "__main__":
     start = time.time()
-    # main()
-    help()
+    main()
+    # help()
     print("------------- Time taken: {} -----------------------------".format(time.time() - start))
